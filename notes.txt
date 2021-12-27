@@ -1,0 +1,12 @@
+# Game Loop
+we are looping, i would say an infinite loop where we have
+in this loop we do three main things:
+    1 - Process Input
+    2 - Update Game
+    3 - Render
+
+
+# Techinical debits
+C++ const functions (const correctness)
+
+    
