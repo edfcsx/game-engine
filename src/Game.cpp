@@ -76,8 +76,13 @@ void Game::processInput() {
 }
 
 void Game::Update() {
-    // Wait until 16ms has elapsed since the last frame
-    while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksLastFrame + FRAME_TARGET_TIME));
+    // Sleep the execution until we reach the target frame time in milliseconds
+    int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
+
+    // only call delay if we are too fast too process this frame
+    if (timeToWait > 0 && timeToWait <= FRAME_TARGET_TIME) {
+        SDL_Delay(timeToWait);
+    }
 
     // Delta time is the difference in ticks from the last frame converted to seconds
     float deltaTime = (SDL_GetTicks() - ticksLastFrame) / 1000.0f;
