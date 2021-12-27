@@ -8,5 +8,6 @@ in this loop we do three main things:
 
 # Techinical debits
 C++ const functions (const correctness)
+Smart Pointers 
 
     

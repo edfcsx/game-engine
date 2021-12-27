@@ -2,16 +2,16 @@
 #include "./Game.h"
 
 int main (int argc, char *args[]) {
-    Game *game = new Game();
-    game->initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    Game game;
+    game.initialize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    while (game->IsRunning()) {
-        game->processInput();
-        game->Update();
-        game->Render();
+    while (game.IsRunning()) {
+        game.processInput();
+        game.Update();
+        game.Render();
     }
 
-    game->Destroy();
+    game.Destroy();
 
     return 0;
 }
