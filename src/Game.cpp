@@ -2,6 +2,7 @@
 #include "./Constants.h"
 #include "./Game.h"
 #include "EntityManager.h"
+#include "./Components/TransformComponent.h"
 #include "../lib/glm/glm.hpp"
 
 EntityManager manager;
@@ -51,8 +52,18 @@ void Game::initialize(int width, int height) {
         return;
     }
 
+    LoadLevel(0);
+
     isRunning = true;
     return;
+}
+
+void Game::LoadLevel(int loadNumber) {
+    Entity& newEntity(manager.AddEntity("Projectile"));
+    newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
+
+    Entity& newEntity2(manager.AddEntity("ProjectileX"));
+    newEntity2.AddComponent<TransformComponent>(0, 50, 50, 0, 32, 32, 1);
 }
 
 void Game::processInput() {
@@ -93,11 +104,7 @@ void Game::Update() {
     // Sets the new ticks for the current frame to be used in the next pass 
     ticksLastFrame = SDL_GetTicks();
 
-    /**
-     * Todo:
-     * Here we call the manager.update to update all entities as function
-     * of deltaTime
-     */
+    manager.Update(deltaTime);
 }
 
 void Game::Render() {
@@ -106,11 +113,11 @@ void Game::Render() {
     // Clear the back buffer
     SDL_RenderClear(renderer);
     
-    /**
-     * Todo: 
-     * Here we call the manager.render to render all entities
-     */
+    if (manager.HasNoEntities()) {
+        return;
+    }
 
+    manager.Render();
 
     // Swap front and back buffers
     SDL_RenderPresent(renderer);

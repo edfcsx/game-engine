@@ -1,10 +1,10 @@
 #ifndef TRANSFORMCOMPONENT_H
 #define TRANSFORMCOMPONENT_H
 
+#include <SDL2/SDL.h>
 #include "../EntityManager.h"
 #include "../../lib/glm/glm.hpp"
-#include "<SDL2/SDL.h>"
-#include "./Game.h"
+#include "../Game.h"
 
 class TransformComponent: public Component {
     public:
@@ -22,7 +22,7 @@ class TransformComponent: public Component {
             scale = s;
         }
 
-        void initialize() override {
+        void initialize() {
 
         }
 
