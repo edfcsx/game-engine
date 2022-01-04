@@ -1,5 +1,6 @@
 #include "./Constants.h"
 #include "./Game.h"
+#define NO_STDIO_REDIRECT
 
 int main (int argc, char *args[]) {
     Game game;

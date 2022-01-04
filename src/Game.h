@@ -5,6 +5,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
+class AssetManager;
+
 class Game {
     private:
         bool isRunning;
@@ -15,6 +17,7 @@ class Game {
         int ticksLastFrame = 0;
         bool IsRunning() const;
         static SDL_Renderer *renderer;
+        static AssetManager* assetManager;
         void LoadLevel(int levelNumber);
         void initialize(int width, int height);
         void processInput();
