@@ -6,5 +6,6 @@ const unsigned int WINDOW_HEIGHT = 600;
 
 const unsigned int FPS = 60;
 const unsigned int FRAME_TARGET_TIME = 1000 / FPS;
+const bool GAME_ENGINE_LOG_ACTIVE = true;
 
 #endif

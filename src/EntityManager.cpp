@@ -1,4 +1,5 @@
 #include <iostream>
+#include "./Constants.h"
 #include "./EntityManager.h"
 #include "Entity.h"
 
@@ -15,6 +16,10 @@ bool EntityManager::HasNoEntities() {
 void EntityManager::Update(float deltaTime) {
     for (auto& entity: entities) {
         entity->Update(deltaTime);
+    }
+
+    if (GAME_ENGINE_LOG_ACTIVE) {
+        EntityManager::ListAllEntities();
     }
 }
 

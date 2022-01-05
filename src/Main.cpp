@@ -1,6 +1,6 @@
 #include "./Constants.h"
 #include "./Game.h"
-#define NO_STDIO_REDIRECT
+#include "./EntityManager.h"
 
 int main (int argc, char *args[]) {
     Game game;
