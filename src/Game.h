@@ -18,6 +18,7 @@ class Game {
         bool IsRunning() const;
         static SDL_Renderer *renderer;
         static AssetManager* assetManager;
+        static SDL_Event event;
         void LoadLevel(int levelNumber);
         void initialize(int width, int height);
         void processInput();
