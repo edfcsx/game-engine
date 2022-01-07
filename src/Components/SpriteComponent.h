@@ -60,7 +60,7 @@ class SpriteComponent: public Component {
             SetTexture(id);
         }
 
-        void Play(std::string animationName) {
+        void Play(std::string animationName) {            
             numFrames = animations[animationName].numFrames;
             animationIndex = animations[animationName].index;
             animationSpeed = animations[animationName].animationSpeed;
