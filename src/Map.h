@@ -1,12 +1,16 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <string>
+
 class Map {
     private:
         std::string textureId;
-        int scale;
-        int tileSize;
     public:
+        int mapSizeX;
+        int mapSizeY;
+        int tileSize;
+        int scale;
         Map(std::string textureId, int scale, int tileSize);
         ~Map();
         void LoadMap(std::string filePath, int mapSizeX, int mapSizeY);

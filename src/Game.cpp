@@ -13,8 +13,8 @@ EntityManager manager;
 AssetManager* Game::assetManager = new AssetManager(&manager);
 SDL_Renderer* Game::renderer;
 SDL_Event Game::event;
-Map* map;
 SDL_Rect Game::camera = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+Map* Game::map = new Map("jungle-tiletexture", 3, 32);;
 
 Game::Game() {
     this->isRunning = false;
@@ -78,10 +78,9 @@ void Game::LoadLevel(int loadNumber) {
     // newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
     // newEntity.AddComponent<SpriteComponent>("tank-image");
 
-    map = new Map("jungle-tiletexture", 3, 32);
-    map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
+    Game::map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
 
-    player.AddComponent<TransformComponent>(240, 500, 0, 0, 32, 32, 3);
+    player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);
     player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
     player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
 
@@ -158,21 +157,25 @@ void Game::HandleCameraMovement () {
     camera.x = mainPlayerTransform->position.x - (WINDOW_WIDTH / 2);
     camera.y = mainPlayerTransform->position.y - (WINDOW_HEIGHT / 2);
 
-    std::cout << "Camera Position -> x: " << camera.x << "y: " << camera.y << std::endl;
+    if (GAME_ENGINE_LOG_ACTIVE) {
+        std::cout << "Camera Position -> x: " << camera.x << "y: " << camera.y << std::endl;
 
-    std::cout << "HandleCameraMovement" << std::endl;
-    std::cout << "Player position x: " << mainPlayerTransform->position.x << std::endl;
-    std::cout << "Player position y: " << mainPlayerTransform->position.y << std::endl;
-    std::cout << "Window widh: " << WINDOW_WIDTH << std::endl;
-    std::cout << "Window Height: " << WINDOW_HEIGHT << std::endl;
+        std::cout << "HandleCameraMovement" << std::endl;
+        std::cout << "Player position x: " << mainPlayerTransform->position.x << std::endl;
+        std::cout << "Player position y: " << mainPlayerTransform->position.y << std::endl;
+        std::cout << "Window widh: " << WINDOW_WIDTH << std::endl;
+        std::cout << "Window Height: " << WINDOW_HEIGHT << std::endl;
+    }
 
     camera.x = camera.x < 0 ? 0 : camera.x;
     camera.y = camera.y < 0 ? 0 : camera.y;
     camera.x = camera.x > camera.w ? camera.w : camera.x;
     camera.y = camera.y > camera.h ? camera.h : camera.y;
 
-    std::cout << "Camera posisition x: " << camera.x << std::endl;
-    std::cout << "Camera position y: " << camera.y << std::endl;
-    std::cout << "Camera width: " << camera.w << std::endl;
-    std::cout << "Camera height: " << camera.h << std::endl;
+    if (GAME_ENGINE_LOG_ACTIVE) {
+        std::cout << "Camera posisition x: " << camera.x << std::endl;
+        std::cout << "Camera position y: " << camera.y << std::endl;
+        std::cout << "Camera width: " << camera.w << std::endl;
+        std::cout << "Camera height: " << camera.h << std::endl;
+    }
 }

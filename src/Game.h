@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include "./Map.h"
 
 class AssetManager;
 
@@ -20,6 +21,7 @@ class Game {
         static AssetManager* assetManager;
         static SDL_Event event;
         static SDL_Rect camera;
+        static Map* map;
         void LoadLevel(int levelNumber);
         void initialize(int width, int height);
         void processInput();

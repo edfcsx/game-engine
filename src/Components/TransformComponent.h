@@ -2,6 +2,7 @@
 #define TRANSFORMCOMPONENT_H
 
 #include <SDL2/SDL.h>
+#include <iostream>
 #include "../EntityManager.h"
 #include "../../lib/glm/glm.hpp"
 #include "../Game.h"
@@ -28,29 +29,32 @@ class TransformComponent: public Component {
         }
 
         void Update(float deltaTime) override {
-            // Todo:
-            // update the position/velocity as a function of deltatime
-            position.x += velocity.x * deltaTime;
-            position.y += velocity.y * deltaTime;
-
-            // if (!InTheEdge(deltaTime)) {
-            //     position.x += velocity.x * deltaTime;
-            //     position.y += velocity.y * deltaTime;
-            // }
+            if (!InTheEdge(deltaTime)) {
+                position.x += velocity.x * deltaTime;
+                position.y += velocity.y * deltaTime;
+            }
         }
 
         void Render() override {}
 
         bool InTheEdge (float deltaTime) {
             glm::vec2 destPos = glm::vec2(
-                static_cast<int>((position.x + (width * scale)) + (velocity.x * deltaTime)),
-                static_cast<int>((position.y + (height * scale)) + (velocity.y * deltaTime))
+                static_cast<int>((position.x + Game::camera.x)  + (velocity.x * deltaTime)),
+                static_cast<int>((position.y + Game::camera.y)  + (velocity.y * deltaTime))
             );
+            
+            int mapSizeX = (Game::map->tileSize * Game::map->scale) * Game::map->mapSizeX;
+            int mapSizeY = (Game::map->tileSize * Game::map->scale) * Game::map->mapSizeY;
 
-            bool axisXInEdge = destPos.x <= (width * scale) || destPos.x >= WINDOW_WIDTH;
-            bool axisYInEdge = destPos.y <= (height * scale) || destPos.y >= WINDOW_HEIGHT;
+            int objectWidthSize = width * scale;
+            int objectHeightSize = height * scale;
 
-            if (axisXInEdge || axisYInEdge) {
+            bool axisXLeftInEdge = destPos.x <= 0;
+            bool axisXRightInEdge = destPos.x >= mapSizeX - objectWidthSize;
+            bool axisYTopInEdge = destPos.y <= 0;
+            bool axisYBottomInEdge = destPos.y >= mapSizeY - (objectHeightSize * 2);
+
+            if (axisXLeftInEdge || axisXRightInEdge || axisYTopInEdge || axisYBottomInEdge) {
                 return true;
             }
 

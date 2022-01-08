@@ -13,6 +13,9 @@ Map::Map(std::string textureId, int scale, int tileSize) {
 }
 
 void Map::LoadMap(std::string filePath, int mapSizeX, int mapSizeY) {
+    this->mapSizeX = mapSizeX;
+    this->mapSizeY = mapSizeY;
+    
     std::fstream mapFile;
     mapFile.open(filePath);
 
