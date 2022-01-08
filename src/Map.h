@@ -11,8 +11,9 @@ class Map {
         int mapSizeY;
         int tileSize;
         int scale;
-        Map(std::string textureId, int scale, int tileSize);
+        Map();
         ~Map();
+        void LoadTexture(std::string textureId, int scale, int tileSize);
         void LoadMap(std::string filePath, int mapSizeX, int mapSizeY);
         void AddTile(int sourceX, int sourceY, int x, int y);
 };

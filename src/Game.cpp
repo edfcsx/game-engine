@@ -14,7 +14,7 @@ AssetManager* Game::assetManager = new AssetManager(&manager);
 SDL_Renderer* Game::renderer;
 SDL_Event Game::event;
 SDL_Rect Game::camera = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
-Map* Game::map = new Map("jungle-tiletexture", 3, 32);;
+Map* Game::map = new Map();
 
 Game::Game() {
     this->isRunning = false;
@@ -78,6 +78,7 @@ void Game::LoadLevel(int loadNumber) {
     // newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
     // newEntity.AddComponent<SpriteComponent>("tank-image");
 
+    Game::map->LoadTexture("jungle-tiletexture", 3, 32);
     Game::map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
 
     player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);

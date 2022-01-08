@@ -6,7 +6,9 @@
 
 extern EntityManager manager;
 
-Map::Map(std::string textureId, int scale, int tileSize) {
+Map::Map() {}
+
+void Map::LoadTexture(std::string textureId, int scale, int tileSize) {
     this->textureId = textureId;
     this->scale = scale;
     this->tileSize = tileSize;
