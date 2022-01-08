@@ -45,8 +45,8 @@ class TileComponent: public Component {
         }
 
         void Update(float deltaTime) override {
-            // Todo: here is where will take care of tile positions
-            // Based on the camera control that will keep moving around
+            destinationRectangle.x = position.x - Game::camera.x;
+            destinationRectangle.y = position.y - Game::camera.y;
         }
 
         void Render() override {

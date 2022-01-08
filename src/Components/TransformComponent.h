@@ -30,11 +30,13 @@ class TransformComponent: public Component {
         void Update(float deltaTime) override {
             // Todo:
             // update the position/velocity as a function of deltatime
-            
-            if (!InTheEdge(deltaTime)) {
-                position.x += velocity.x * deltaTime;
-                position.y += velocity.y * deltaTime;
-            }
+            position.x += velocity.x * deltaTime;
+            position.y += velocity.y * deltaTime;
+
+            // if (!InTheEdge(deltaTime)) {
+            //     position.x += velocity.x * deltaTime;
+            //     position.y += velocity.y * deltaTime;
+            // }
         }
 
         void Render() override {}

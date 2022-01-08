@@ -14,6 +14,7 @@ AssetManager* Game::assetManager = new AssetManager(&manager);
 SDL_Renderer* Game::renderer;
 SDL_Event Game::event;
 Map* map;
+SDL_Rect Game::camera = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 
 Game::Game() {
     this->isRunning = false;
@@ -65,6 +66,8 @@ void Game::initialize(int width, int height) {
     return;
 }
 
+Entity& player(manager.AddEntity("chopper", PLAYER_LAYER));
+
 void Game::LoadLevel(int loadNumber) {
     assetManager->AddTexture("tank-image", std::string("./assets/images/tank-big-right.png").c_str());
     assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
@@ -78,10 +81,9 @@ void Game::LoadLevel(int loadNumber) {
     map = new Map("jungle-tiletexture", 3, 32);
     map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
 
-    Entity& chopperEntity(manager.AddEntity("chopper", PLAYER_LAYER));
-    chopperEntity.AddComponent<TransformComponent>(240, 106, 0, 0, 32, 32, 3);
-    chopperEntity.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
-    chopperEntity.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
+    player.AddComponent<TransformComponent>(240, 500, 0, 0, 32, 32, 3);
+    player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+    player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
 
     Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
     radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
@@ -126,6 +128,7 @@ void Game::Update() {
     ticksLastFrame = SDL_GetTicks();
 
     manager.Update(deltaTime);
+    HandleCameraMovement();
 }
 
 void Game::Render() {
@@ -148,4 +151,28 @@ void Game::Destroy() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+void Game::HandleCameraMovement () {
+    TransformComponent* mainPlayerTransform = player.GetComponent<TransformComponent>();
+    camera.x = mainPlayerTransform->position.x - (WINDOW_WIDTH / 2);
+    camera.y = mainPlayerTransform->position.y - (WINDOW_HEIGHT / 2);
+
+    std::cout << "Camera Position -> x: " << camera.x << "y: " << camera.y << std::endl;
+
+    std::cout << "HandleCameraMovement" << std::endl;
+    std::cout << "Player position x: " << mainPlayerTransform->position.x << std::endl;
+    std::cout << "Player position y: " << mainPlayerTransform->position.y << std::endl;
+    std::cout << "Window widh: " << WINDOW_WIDTH << std::endl;
+    std::cout << "Window Height: " << WINDOW_HEIGHT << std::endl;
+
+    camera.x = camera.x < 0 ? 0 : camera.x;
+    camera.y = camera.y < 0 ? 0 : camera.y;
+    camera.x = camera.x > camera.w ? camera.w : camera.x;
+    camera.y = camera.y > camera.h ? camera.h : camera.y;
+
+    std::cout << "Camera posisition x: " << camera.x << std::endl;
+    std::cout << "Camera position y: " << camera.y << std::endl;
+    std::cout << "Camera width: " << camera.w << std::endl;
+    std::cout << "Camera height: " << camera.h << std::endl;
 }
