@@ -19,6 +19,7 @@ Map* Game::map = new Map();
 
 Game::Game() {
     this->isRunning = false;
+    this->isDebugEnabled = false;
 }
 
 Game::~Game() {
@@ -26,6 +27,10 @@ Game::~Game() {
 
 bool Game::IsRunning() const {
     return this->isRunning;
+}
+
+bool Game::IsDebugEnabled() const {
+    return this->isDebugEnabled;
 }
 
 void Game::initialize(int width, int height) {
@@ -105,6 +110,12 @@ void Game::processInput() {
             if (event.key.keysym.sym == SDLK_ESCAPE) {
                 isRunning = false;
             }
+
+            if (event.key.keysym.sym == SDLK_F1) {
+                isDebugEnabled = !isDebugEnabled;
+                std::cout << "debug mode is: " << IsDebugEnabled() << std::endl;
+                break;
+            }
         }
         default: {
             break;
@@ -146,6 +157,10 @@ void Game::Render() {
     }
 
     manager.Render();
+
+    if (IsDebugEnabled()) {
+        RenderDebugs();
+    }
 
     // Swap front and back buffers
     SDL_RenderPresent(renderer);
@@ -191,4 +206,8 @@ void Game::CheckCollisions() {
     if (collisionTagType.compare("enemy") == 0) {
         isRunning = false;
     }
+}
+
+void Game::RenderDebugs() {
+    manager.RenderEntitiesDebugs();
 }

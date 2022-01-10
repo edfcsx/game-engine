@@ -5,6 +5,7 @@
 #include "./TransformComponent.h"
 #include "../Component.h"
 #include "../TextureManager.h"
+#include "../AssetManager.h"
 #include "../Game.h"
 #include "../Animation.h"
 
@@ -94,6 +95,10 @@ class SpriteComponent: public Component {
 
         void Render() override {
             TextureManager::Draw(texture, sourceRectangle, destinationRectangle, spriteFlip);
+        }
+
+        bool IsFixed() const {
+            return this->isFixed;
         }
 };
 

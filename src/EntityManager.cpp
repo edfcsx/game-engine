@@ -3,7 +3,10 @@
 #include "./EntityManager.h"
 #include "Entity.h"
 #include "./Components/ColliderComponent.h"
+#include "./Components/TransformComponent.h"
+#include "./Components/SpriteComponent.h"
 #include "./Collision.h"
+#include "./Game.h"
 
 void EntityManager::ClearData() {
     for (auto& entity: entities) {
@@ -86,4 +89,42 @@ std::string EntityManager::CheckEntityCollisions(Entity& myEntity) const {
     }
 
     return std::string();
+}
+
+void EntityManager::RenderEntitiesDebugs() const {
+    for (auto& entity: entities) {
+        if (entity->name.compare("Tile") != 0) {
+            TransformComponent* transform = entity->GetComponent<TransformComponent>();
+            bool isFixed = false;
+
+            if (entity->HasComponent<SpriteComponent>()) {
+                SpriteComponent* sprite = entity->GetComponent<SpriteComponent>();
+                isFixed = sprite->IsFixed();
+            }
+
+            SDL_Rect transformRectDebug = {
+                transform->position.x - (isFixed ? 0 : Game::camera.x) - 2,
+                transform->position.y - (isFixed ? 0 : Game::camera.y) - 2,
+                transform->width * transform->scale + 5,
+                transform->height * transform->scale + 5
+            };
+
+            SDL_SetRenderDrawColor(Game::renderer, 192, 57, 43, 255);
+            SDL_RenderDrawRect(Game::renderer, &transformRectDebug);
+
+            if (entity->HasComponent<ColliderComponent>()) {
+                ColliderComponent* collider = entity->GetComponent<ColliderComponent>();
+
+                SDL_Rect transformRectDebug = {
+                    collider->collider.x - (isFixed ? 0 : Game::camera.x),
+                    collider->collider.y - (isFixed ? 0 : Game::camera.y),
+                    collider->collider.w,
+                    collider->collider.h
+                };
+
+                SDL_SetRenderDrawColor(Game::renderer, 39, 174, 96, 255);
+                SDL_RenderDrawRect(Game::renderer, &transformRectDebug);
+            }
+        }
+    }
 }

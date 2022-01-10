@@ -16,7 +16,9 @@ class Game {
         Game();
         ~Game();
         int ticksLastFrame = 0;
+        bool isDebugEnabled;
         bool IsRunning() const;
+        bool IsDebugEnabled() const;
         static SDL_Renderer *renderer;
         static AssetManager* assetManager;
         static SDL_Event event;
@@ -30,6 +32,7 @@ class Game {
         void Destroy();
         void HandleCameraMovement();
         void CheckCollisions();
+        void RenderDebugs();
 };
 
 #endif
