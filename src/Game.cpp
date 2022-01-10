@@ -6,6 +6,7 @@
 #include "./Components/TransformComponent.h"
 #include "./Components/SpriteComponent.h"
 #include "./Components/KeyboardControlComponent.h"
+#include "./Components/ColliderComponent.h"
 #include "../lib/glm/glm.hpp"
 #include "./Map.h"
 
@@ -74,16 +75,18 @@ void Game::LoadLevel(int loadNumber) {
     assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
     assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
     
-    // Entity& newEntity(manager.AddEntity("tank"));
-    // newEntity.AddComponent<TransformComponent>(0, 0, 20, 20, 32, 32, 1);
-    // newEntity.AddComponent<SpriteComponent>("tank-image");
-
     Game::map->LoadTexture("jungle-tiletexture", 3, 32);
     Game::map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
 
     player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);
     player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
     player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
+    player.AddComponent<ColliderComponent>("player", 320, 160, 32, 32);
+
+    Entity& tankEnemy1(manager.AddEntity("tank", ENEMY_LAYER));
+    tankEnemy1.AddComponent<TransformComponent>(300, 730, 30, 0, 32, 32, 2);
+    tankEnemy1.AddComponent<SpriteComponent>("tank-image");
+    tankEnemy1.AddComponent<ColliderComponent>("enemy", 400, 300, 32, 32);
 
     Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
     radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
@@ -129,6 +132,7 @@ void Game::Update() {
 
     manager.Update(deltaTime);
     HandleCameraMovement();
+    CheckCollisions();
 }
 
 void Game::Render() {
@@ -178,5 +182,13 @@ void Game::HandleCameraMovement () {
         std::cout << "Camera position y: " << camera.y << std::endl;
         std::cout << "Camera width: " << camera.w << std::endl;
         std::cout << "Camera height: " << camera.h << std::endl;
+    }
+}
+
+void Game::CheckCollisions() {
+    std::string collisionTagType = manager.CheckEntityCollisions(player);
+
+    if (collisionTagType.compare("enemy") == 0) {
+        isRunning = false;
     }
 }
