@@ -86,12 +86,12 @@ void Game::LoadLevel(int loadNumber) {
     player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);
     player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
     player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
-    player.AddComponent<ColliderComponent>("player", 320, 160, 32, 32);
+    player.AddComponent<ColliderComponent>("PLAYER", 320, 160, 32, 32);
 
     Entity& tankEnemy1(manager.AddEntity("tank", ENEMY_LAYER));
     tankEnemy1.AddComponent<TransformComponent>(300, 730, 30, 0, 32, 32, 2);
     tankEnemy1.AddComponent<SpriteComponent>("tank-image");
-    tankEnemy1.AddComponent<ColliderComponent>("enemy", 400, 300, 32, 32);
+    tankEnemy1.AddComponent<ColliderComponent>("ENEMY", 400, 300, 32, 32);
 
     Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
     radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
@@ -201,9 +201,12 @@ void Game::HandleCameraMovement () {
 }
 
 void Game::CheckCollisions() {
-    std::string collisionTagType = manager.CheckEntityCollisions(player);
+    CollisionType CollisionType = manager.CheckCollisions();
 
-    if (collisionTagType.compare("enemy") == 0) {
+    std::cout << "Collision Type: " << CollisionType << std::endl;
+
+    if (CollisionType == PLAYER_ENEMY_COLLISION) {
+        std::cout << "Game Over" << std::endl;
         isRunning = false;
     }
 }
