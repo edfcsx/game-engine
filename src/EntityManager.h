@@ -20,6 +20,7 @@ class EntityManager {
         void ListAllEntities() const;
         CollisionType CheckCollisions() const;
         void RenderEntitiesDebugs() const;
+        void DestroyInactiveEntities();
 };
 
 #endif

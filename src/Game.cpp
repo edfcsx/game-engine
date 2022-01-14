@@ -8,6 +8,7 @@
 #include "./Components/KeyboardControlComponent.h"
 #include "./Components/ColliderComponent.h"
 #include "./Components/TextLabelComponent.h"
+#include "./Components/ProjectileEmitterComponent.h"
 #include "../lib/glm/glm.hpp"
 #include "./Map.h"
 
@@ -105,8 +106,8 @@ void Game::LoadLevel(int loadNumber) {
     Entity& projectile(manager.AddEntity("projectile", PROJECTILE_LAYER));
     projectile.AddComponent<TransformComponent>(300+(16*2), 730+(16*2), 0, 0, 4, 4, 2);
     projectile.AddComponent<SpriteComponent>("projectile-image");
-    projectile.AddComponent<ColliderComponent>("PROJECTILE", 300+16, 730+16, 4, 4);
-    // projectile.AddComponent<ProjectileEmitterComponent>()
+    projectile.AddComponent<ColliderComponent>("PROJECTILE", 300+(16*2), 730+(16*2), 4, 4);
+    projectile.AddComponent<ProjectileEmitterComponent>(250, 35, 800, true);
 
     Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
     radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
@@ -222,6 +223,11 @@ void Game::CheckCollisions() {
     CollisionType CollisionType = manager.CheckCollisions();
 
     if (CollisionType == PLAYER_ENEMY_COLLISION) {
+        std::cout << "Game Over" << std::endl;
+        isRunning = false;
+    }
+
+    if (CollisionType == PLAYER_PROJECTILE_COLLISION) {
         std::cout << "Game Over" << std::endl;
         isRunning = false;
     }

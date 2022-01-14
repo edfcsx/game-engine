@@ -20,6 +20,14 @@ bool EntityManager::HasNoEntities() {
     return entities.size() == 0;
 }
 
+void EntityManager::DestroyInactiveEntities() {
+    for (int i = 0; i < entities.size(); i++) {
+        if (!entities[i]->IsActive()) {
+            entities.erase(entities.begin() + i);
+        }
+    }
+}
+
 void EntityManager::Update(float deltaTime) {
     for (auto& entity: entities) {
         entity->Update(deltaTime);
@@ -28,6 +36,8 @@ void EntityManager::Update(float deltaTime) {
     if (GAME_ENGINE_LOG_ACTIVE) {
         EntityManager::ListAllEntities();
     }
+
+    DestroyInactiveEntities();
 }
 
 void EntityManager::Render() {
