@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include <iostream>
 #include "./Constants.h"
 #include "./EntityManager.h"
@@ -5,6 +6,7 @@
 #include "./Components/ColliderComponent.h"
 #include "./Components/TransformComponent.h"
 #include "./Components/SpriteComponent.h"
+#include "./Components/TextLabelComponent.h"
 #include "./Collision.h"
 #include "./Game.h"
 
@@ -112,7 +114,7 @@ CollisionType EntityManager::CheckCollisions () const {
 
 void EntityManager::RenderEntitiesDebugs() const {
     for (auto& entity: entities) {
-        if (entity->name.compare("Tile") != 0) {
+        if (entity->name.compare("Tile") != 0 && !entity->HasComponent<TextLabelComponent>()) {
             TransformComponent* transform = entity->GetComponent<TransformComponent>();
             bool isFixed = false;
 

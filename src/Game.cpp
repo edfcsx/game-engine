@@ -7,6 +7,7 @@
 #include "./Components/SpriteComponent.h"
 #include "./Components/KeyboardControlComponent.h"
 #include "./Components/ColliderComponent.h"
+#include "./Components/TextLabelComponent.h"
 #include "../lib/glm/glm.hpp"
 #include "./Map.h"
 
@@ -19,7 +20,7 @@ Map* Game::map = new Map();
 
 Game::Game() {
     this->isRunning = false;
-    this->isDebugEnabled = false;
+    this->isDebugEnabled = true;
 }
 
 Game::~Game() {
@@ -36,6 +37,11 @@ bool Game::IsDebugEnabled() const {
 void Game::initialize(int width, int height) {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         std::cerr << "Error on initializing SDL." << std::endl;
+        return;
+    }
+
+    if (TTF_Init() != 0) {
+        std::cerr << "Error on initialize SDL TTF" << std::endl;
         return;
     }
 
@@ -79,6 +85,9 @@ void Game::LoadLevel(int loadNumber) {
     assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
     assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
     assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
+    assetManager->AddTexture("projectile-image", std::string("./assets/images/bullet-enemy.png").c_str());
+
+    assetManager->AddFont("charriot-font", std::string("./assets/fonts/charriot.ttf").c_str(), 22);
     
     Game::map->LoadTexture("jungle-tiletexture", 3, 32);
     Game::map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
@@ -89,13 +98,22 @@ void Game::LoadLevel(int loadNumber) {
     player.AddComponent<ColliderComponent>("PLAYER", 320, 160, 32, 32);
 
     Entity& tankEnemy1(manager.AddEntity("tank", ENEMY_LAYER));
-    tankEnemy1.AddComponent<TransformComponent>(300, 730, 30, 0, 32, 32, 2);
+    tankEnemy1.AddComponent<TransformComponent>(300, 730, 0, 0, 32, 32, 2);
     tankEnemy1.AddComponent<SpriteComponent>("tank-image");
     tankEnemy1.AddComponent<ColliderComponent>("ENEMY", 400, 300, 32, 32);
+
+    Entity& projectile(manager.AddEntity("projectile", PROJECTILE_LAYER));
+    projectile.AddComponent<TransformComponent>(300+(16*2), 730+(16*2), 0, 0, 4, 4, 2);
+    projectile.AddComponent<SpriteComponent>("projectile-image");
+    projectile.AddComponent<ColliderComponent>("PROJECTILE", 300+16, 730+16, 4, 4);
+    // projectile.AddComponent<ProjectileEmitterComponent>()
 
     Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
     radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
     radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, true);
+
+    Entity& labelLevelName(manager.AddEntity("LabelLevelName", UI_LAYER));
+    labelLevelName.AddComponent<TextLabelComponent>(10, 10, "First Level...", "charriot-font", WHITE_COLOR);
 }
 
 void Game::processInput() {
@@ -202,8 +220,6 @@ void Game::HandleCameraMovement () {
 
 void Game::CheckCollisions() {
     CollisionType CollisionType = manager.CheckCollisions();
-
-    std::cout << "Collision Type: " << CollisionType << std::endl;
 
     if (CollisionType == PLAYER_ENEMY_COLLISION) {
         std::cout << "Game Over" << std::endl;
