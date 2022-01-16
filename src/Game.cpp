@@ -18,6 +18,8 @@ SDL_Renderer* Game::renderer;
 SDL_Event Game::event;
 SDL_Rect Game::camera = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 Map* Game::map = new Map();
+Entity* mainPlayer = NULL;
+
 
 Game::Game() {
     this->isRunning = false;
@@ -79,7 +81,6 @@ void Game::initialize(int width, int height) {
     return;
 }
 
-Entity& player(manager.AddEntity("chopper", PLAYER_LAYER));
 
 void Game::LoadLevel(int levelNumber) {
     sol::state lua;
@@ -93,15 +94,16 @@ void Game::LoadLevel(int levelNumber) {
     /*********************************************/
     sol::table data = lua[levelName];
     sol::table assets = data["assets"];
-
-    unsigned int assetIndex = 0;
+    
+    unsigned int index = 0;
+    
     while (true) {
-        sol::optional<sol::table> existsIndex = assets[assetIndex];
+        sol::optional<sol::table> existsIndex = assets[index];
 
         if (existsIndex == sol::nullopt) {
             break;
         } else {
-            sol::table asset = assets[assetIndex];
+            sol::table asset = assets[index];
             std::string type = asset["type"];
             std::string id = asset["id"];
             std::string file = asset["file"];
@@ -113,7 +115,7 @@ void Game::LoadLevel(int levelNumber) {
             }
         }
 
-        assetIndex++;
+        index++;
     }
 
     /*********************************************/
@@ -133,29 +135,132 @@ void Game::LoadLevel(int levelNumber) {
         map["size"]["y"]
     );
 
-    
-    player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);
-    player.AddComponent<SpriteComponent>("chopper-texture", 2, 90, true, false);
-    player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
-    player.AddComponent<ColliderComponent>("PLAYER", 320, 160, 32, 32);
+    /*********************************************/
+    /* LOADS ENTITIES FROM LUA CONFIG FILE       */
+    /*********************************************/
+    sol::table entities = data["entities"];
+    index = 0;
 
-    Entity& tankEnemy1(manager.AddEntity("tank", ENEMY_LAYER));
-    tankEnemy1.AddComponent<TransformComponent>(300, 730, 0, 0, 32, 32, 2);
-    tankEnemy1.AddComponent<SpriteComponent>("tank-texture-big-right");
-    tankEnemy1.AddComponent<ColliderComponent>("ENEMY", 400, 300, 32, 32);
+    while (true) {
+        sol::optional<sol::table> existsIndex = entities[index];
 
-    Entity& projectile(manager.AddEntity("projectile", PROJECTILE_LAYER));
-    projectile.AddComponent<TransformComponent>(300+(16*2), 730+(16*2), 0, 0, 4, 4, 2);
-    projectile.AddComponent<SpriteComponent>("projectile-texture");
-    projectile.AddComponent<ColliderComponent>("PROJECTILE", 300+(16*2), 730+(16*2), 4, 4);
-    projectile.AddComponent<ProjectileEmitterComponent>(250, 35, 800, true);
+        if (existsIndex == sol::nullopt) {
+            break;
+        }
 
-    Entity& radarEntity(manager.AddEntity("radar", UI_LAYER));
-    radarEntity.AddComponent<TransformComponent>(720, 15, 0, 0, 64, 64, 1);
-    radarEntity.AddComponent<SpriteComponent>("radar-image", 8, 150, false, true);
+        sol::table entity = entities[index];
+        std::string name = entity["name"];
+        LayerType layer = static_cast<LayerType>(static_cast<int>(entity["layer"]));
 
-    Entity& labelLevelName(manager.AddEntity("LabelLevelName", UI_LAYER));
-    labelLevelName.AddComponent<TextLabelComponent>(10, 10, "First Level...", "charriot-font", WHITE_COLOR);
+        auto& newEntity(manager.AddEntity(name, layer));
+
+        sol::optional<sol::table> existsTransformComponent = entity["components"]["transform"];
+        if (existsTransformComponent != sol::nullopt) {
+            sol::table transform = entity["components"]["transform"];
+
+            newEntity.AddComponent<TransformComponent>(
+                static_cast<int>(transform["position"]["x"]),
+                static_cast<int>(transform["position"]["y"]),
+                static_cast<int>(transform["velocity"]["x"]),
+                static_cast<int>(transform["velocity"]["y"]),
+                static_cast<int>(transform["width"]),
+                static_cast<int>(transform["height"]),
+                static_cast<int>(transform["scale"])
+            );
+        }
+
+        sol::optional<sol::table> existsSpriteComponent = entity["components"]["sprite"];
+        if (existsSpriteComponent != sol::nullopt) {
+            sol::table sprite = entity["components"]["sprite"];
+            bool isAnimated = static_cast<bool>(sprite["animated"]);
+
+            if (isAnimated) {
+                newEntity.AddComponent<SpriteComponent>(
+                    sprite["textureAssetId"],
+                    sprite["_animated"]["frameCount"],
+                    sprite["_animated"]["animationSpeed"],
+                    static_cast<bool>(sprite["_animated"]["hasDirections"]),
+                    static_cast<bool>(sprite["fixed"])
+                );
+            } else {
+                newEntity.AddComponent<SpriteComponent>(sprite["textureAssetId"], sprite["fixed"]);
+            }
+        }
+
+        sol::optional<sol::table> existsControlComponent = entity["components"]["input"];
+        if (existsControlComponent != sol::nullopt) {
+            sol::table keyboard = entity["components"]["input"]["keyboard"];
+
+            std::string upKey = keyboard["up"];
+            std::string downKey = keyboard["down"];
+            std::string leftKey = keyboard["left"];
+            std::string rightKey = keyboard["right"];
+            std::string shootKey = keyboard["shoot"];
+
+            newEntity.AddComponent<KeyboardControlComponent>(upKey, downKey, rightKey, leftKey, shootKey);
+        }
+
+        sol::optional<sol::table> existsColliderComponent = entity["components"]["collider"];
+        if (existsColliderComponent != sol::nullopt) {
+            sol::table transform = entity["components"]["transform"];
+            sol::table collider = entity["components"]["collider"];
+
+            newEntity.AddComponent<ColliderComponent>(
+                collider["tag"],
+                transform["position"]["x"],
+                transform["position"]["y"],
+                transform["width"],
+                transform["height"]
+            );
+
+        }
+
+        sol::optional<sol::table> existsProjectileEmitterComponent = entity["components"]["projectileEmitter"];
+        if (existsProjectileEmitterComponent != sol::nullopt) {
+            sol::table projectile = entity["components"]["projectileEmitter"];
+            auto& newEntityProjectile(manager.AddEntity(projectile["name"], PROJECTILE_LAYER));
+
+            sol::table projectileTransform = entity["components"]["transform"];
+            int posX = static_cast<int>(projectileTransform["position"]["x"]) + ((static_cast<int>(projectileTransform["width"]) / 2) * static_cast<int>(projectileTransform["scale"]));
+            int posY = static_cast<int>(projectileTransform["position"]["y"]) + ((static_cast<int>(projectileTransform["height"]) / 2) * static_cast<int>(projectileTransform["scale"]));
+
+            newEntityProjectile.AddComponent<TransformComponent>(
+                posX,
+                posY,
+                0,
+                0,
+                static_cast<int>(projectile["width"]),
+                static_cast<int>(projectile["height"]),
+                static_cast<int>(projectileTransform["scale"])
+            );
+
+            newEntityProjectile.AddComponent<SpriteComponent>(projectile["textureAssetId"], false);
+            newEntityProjectile.AddComponent<ColliderComponent>(projectile["collider"]["tag"], posX, posY, projectile["width"], projectile["height"]);
+            newEntityProjectile.AddComponent<ProjectileEmitterComponent>(
+                projectile["speed"],
+                projectile["angle"],
+                projectile["range"],
+                projectile["shouldLoop"]
+            );
+        }
+
+        sol::optional<sol::table> existsLabelComponent = entity["components"]["label"];
+        if (existsLabelComponent != sol::nullopt) {
+            sol::table label = entity["components"]["label"];
+
+            newEntity.AddComponent<TextLabelComponent>(
+                static_cast<int>(label["position"]["x"]),
+                static_cast<int>(label["position"]["y"]),
+                label["text"],
+                label["font"],
+                WHITE_COLOR
+            );
+        }
+
+        index++;
+    }
+
+    mainPlayer = manager.GetEntityByName("player");
 }
 
 void Game::processInput() {
@@ -233,30 +338,16 @@ void Game::Destroy() {
 }
 
 void Game::HandleCameraMovement () {
-    TransformComponent* mainPlayerTransform = player.GetComponent<TransformComponent>();
-    camera.x = mainPlayerTransform->position.x - (WINDOW_WIDTH / 2);
-    camera.y = mainPlayerTransform->position.y - (WINDOW_HEIGHT / 2);
+    if (mainPlayer) {
+        TransformComponent* mainPlayerTransform = mainPlayer->GetComponent<TransformComponent>();
+        camera.x = mainPlayerTransform->position.x - (WINDOW_WIDTH / 2);
+        camera.y = mainPlayerTransform->position.y - (WINDOW_HEIGHT / 2);
 
-    if (GAME_ENGINE_LOG_ACTIVE) {
-        std::cout << "Camera Position -> x: " << camera.x << "y: " << camera.y << std::endl;
-
-        std::cout << "HandleCameraMovement" << std::endl;
-        std::cout << "Player position x: " << mainPlayerTransform->position.x << std::endl;
-        std::cout << "Player position y: " << mainPlayerTransform->position.y << std::endl;
-        std::cout << "Window widh: " << WINDOW_WIDTH << std::endl;
-        std::cout << "Window Height: " << WINDOW_HEIGHT << std::endl;
-    }
-
-    camera.x = camera.x < 0 ? 0 : camera.x;
-    camera.y = camera.y < 0 ? 0 : camera.y;
-    camera.x = camera.x > camera.w ? camera.w : camera.x;
-    camera.y = camera.y > camera.h ? camera.h : camera.y;
-
-    if (GAME_ENGINE_LOG_ACTIVE) {
-        std::cout << "Camera posisition x: " << camera.x << std::endl;
-        std::cout << "Camera position y: " << camera.y << std::endl;
-        std::cout << "Camera width: " << camera.w << std::endl;
-        std::cout << "Camera height: " << camera.h << std::endl;
+    
+        camera.x = camera.x < 0 ? 0 : camera.x;
+        camera.y = camera.y < 0 ? 0 : camera.y;
+        camera.x = camera.x > camera.w ? camera.w : camera.x;
+        camera.y = camera.y > camera.h ? camera.h : camera.y;
     }
 }
 

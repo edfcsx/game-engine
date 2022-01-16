@@ -29,17 +29,24 @@ Level1 = {
                         x = 240,
                         y = 106
                     },
+                    velocity = {
+                        x = 0,
+                        y = 0
+                    },
                     width = 32,
                     height = 32,
-                    scale = 1,
+                    scale = 3,
                     rotation = 0
                 },
                 sprite = {
                     textureAssetId = "chopper-texture",
                     animated = true,
-                    frameCount = 2,
-                    animationSpeed = 90,
-                    fixed = false
+                    fixed = false,
+                    _animated = {
+                        frameCount = 2,
+                        animationSpeed = 90,
+                        hasDirections = true,
+                    }
                 },
                 collider = {
                     tag = "PLAYER"
@@ -61,28 +68,85 @@ Level1 = {
             components = {
                 transform = {
                     position = {
-                        x = 650,
-                        y = 405
+                        x = 300,
+                        y = 730
+                    },
+                    velocity = {
+                        x = 0,
+                        y = 0
                     },
                     width = 32,
                     height = 32,
-                    scale = 1,
+                    scale = 2,
                     rotation = 0
                 },
                 sprite = {
-                    textureAssetId = "tank-texture-big-left",
-                    animated = false
+                    textureAssetId = "tank-texture-big-right",
+                    animated = false,
+                    fixed = false
                 },
                 collider = {
                     tag = "ENEMY"
                 },
                 projectileEmitter = {
-                    textureAssetId = "bullet-enemy",
-                    speed = 50,
-                    range = 200,
-                    angle = 180
+                    name = "projectile-tank-enemy-1",
+                    speed = 250,
+                    range = 800,
+                    angle = 340,
+                    width = 4,
+                    height = 4,
+                    shouldLoop = true,
+                    textureAssetId = "projectile-texture",
+                    collider = {
+                        tag = "PROJECTILE"
+                    }
                 }
             }
+        },
+        [2] = {
+            name = "radar-ui",
+            layer = 5,
+            components = {
+                transform = {
+                    position = {
+                        x = 720,
+                        y = 15
+                    },
+                    velocity = {
+                        x = 0,
+                        y = 0
+                    },
+                    width = 64,
+                    height = 64,
+                    scale = 1,
+                    rotation = 0
+                },
+                sprite = {
+                    textureAssetId = "radar-image",
+                    animated = true,
+                    fixed = true,
+                    _animated = {
+                        frameCount = 8,
+                        animationSpeed = 150,
+                        hasDirections = false
+                    }
+                }
+            }
+        },
+        [3] = {
+            name = "level-text",
+            layer = 5,
+            components = {
+                label = {
+                    font = "charriot-font",
+                    text = "First Level...",
+                    position = {
+                        x = 10,
+                        y = 10
+                    }
+                }
+            }
+            
         }
     }
 }
