@@ -73,7 +73,7 @@ void Game::initialize(int width, int height) {
         return;
     }
 
-    LoadLevel(0);
+    LoadLevel(1);
 
     isRunning = true;
     return;
@@ -81,31 +81,72 @@ void Game::initialize(int width, int height) {
 
 Entity& player(manager.AddEntity("chopper", PLAYER_LAYER));
 
-void Game::LoadLevel(int loadNumber) {
-    assetManager->AddTexture("tank-image", std::string("./assets/images/tank-big-right.png").c_str());
-    assetManager->AddTexture("chopper-image", std::string("./assets/images/chopper-spritesheet.png").c_str());
-    assetManager->AddTexture("radar-image", std::string("./assets/images/radar.png").c_str());
-    assetManager->AddTexture("jungle-tiletexture", std::string("./assets/tilemaps/jungle.png").c_str());
-    assetManager->AddTexture("projectile-image", std::string("./assets/images/bullet-enemy.png").c_str());
+void Game::LoadLevel(int levelNumber) {
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::os, sol::lib::math);
 
-    assetManager->AddFont("charriot-font", std::string("./assets/fonts/charriot.ttf").c_str(), 22);
+    std::string levelName = "Level" + std::to_string(levelNumber);
+    lua.script_file("./assets/scripts/" + levelName + ".lua");
+
+    /*********************************************/
+    /* LOADS ASSETS FROM LUA CONFIG FILE         */
+    /*********************************************/
+    sol::table data = lua[levelName];
+    sol::table assets = data["assets"];
+
+    unsigned int assetIndex = 0;
+    while (true) {
+        sol::optional<sol::table> existsIndex = assets[assetIndex];
+
+        if (existsIndex == sol::nullopt) {
+            break;
+        } else {
+            sol::table asset = assets[assetIndex];
+            std::string type = asset["type"];
+            std::string id = asset["id"];
+            std::string file = asset["file"];
+
+            if (type.compare("texture") == 0) {
+                assetManager->AddTexture(id, file.c_str());
+            } else if (type.compare("font") == 0) {
+                assetManager->AddFont(id, file.c_str(), static_cast<int>(asset["fontSize"]));
+            }
+        }
+
+        assetIndex++;
+    }
+
+    /*********************************************/
+    /* LOADS MAP FROM LUA CONFIG FILE            */
+    /*********************************************/
+
+    sol::table map = data["map"];
+    Game::map->LoadTexture(
+        map["textureAssetId"],
+        map["scale"],
+        map["tileSize"]
+    );
+
+    Game::map->LoadMap(
+        map["file"],
+        map["size"]["x"],
+        map["size"]["y"]
+    );
+
     
-    Game::map->LoadTexture("jungle-tiletexture", 3, 32);
-    Game::map->LoadMap("./assets/tilemaps/jungle.map", 25, 20);
-
     player.AddComponent<TransformComponent>(320, 160, 0, 0, 32, 32, 3);
-    player.AddComponent<SpriteComponent>("chopper-image", 2, 90, true, false);
+    player.AddComponent<SpriteComponent>("chopper-texture", 2, 90, true, false);
     player.AddComponent<KeyboardControlComponent>("up", "down", "right", "left", "space");
     player.AddComponent<ColliderComponent>("PLAYER", 320, 160, 32, 32);
 
     Entity& tankEnemy1(manager.AddEntity("tank", ENEMY_LAYER));
     tankEnemy1.AddComponent<TransformComponent>(300, 730, 0, 0, 32, 32, 2);
-    tankEnemy1.AddComponent<SpriteComponent>("tank-image");
+    tankEnemy1.AddComponent<SpriteComponent>("tank-texture-big-right");
     tankEnemy1.AddComponent<ColliderComponent>("ENEMY", 400, 300, 32, 32);
 
     Entity& projectile(manager.AddEntity("projectile", PROJECTILE_LAYER));
     projectile.AddComponent<TransformComponent>(300+(16*2), 730+(16*2), 0, 0, 4, 4, 2);
-    projectile.AddComponent<SpriteComponent>("projectile-image");
+    projectile.AddComponent<SpriteComponent>("projectile-texture");
     projectile.AddComponent<ColliderComponent>("PROJECTILE", 300+(16*2), 730+(16*2), 4, 4);
     projectile.AddComponent<ProjectileEmitterComponent>(250, 35, 800, true);
 
